@@ -1,20 +1,21 @@
 {
   "compilerOptions": {
-    "baseUrl": ".",
-    "paths": {
-      "@prisma/client": ["prisma/src/generated"]
-    },
     "target": "ES2020",
-    "module": "Node16", // must match moduleResolution
-    "moduleResolution": "Node16", // updated
+    "module": "Node16",
+    "moduleResolution": "Node16",
+    "outDir": "./dist",
+    "rootDir": "./src",
+    /* Best Practice: Use paths instead of baseUrl for modern resolution */
+    "paths": {
+      "*": ["./src/*", "./generated/*"]
+    },
     "esModuleInterop": true,
     "strict": true,
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true,
     "types": ["node"],
-    "resolveJsonModule": true, // optional if you import JSON
-    "ignoreDeprecations": "6.0" // optional
+    "resolveJsonModule": true
   },
-  "include": ["src/**/*.ts", "generated/prisma", "prisma.config.ts"],
-  "exclude": ["dist"]
+  "include": ["src/**/*.ts", "generated/prisma", "src/helpers"],
+  "exclude": ["node_modules", "dist"]
 }

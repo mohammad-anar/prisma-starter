@@ -1,23 +1,40 @@
 import cors from "cors";
 import express, { Application, Request, Response } from "express";
-import globalErrorHandler from "./app/middlewares/globalErrorHandler";
-import notFound from "./app/middlewares/notFound";
-import router from "./app/routes";
-import config from "./config";
+import config from "./config/index.js";
+import router from "./app/routes/index.js";
+import globalErrorHandler from "./app/middlewares/globalErrorHandler.js";
+import notFound from "./app/middlewares/notFound.js";
+import { getIO } from "./helpers/socketHelper.js";
 
 const app: Application = express();
 app.use(
   cors({
-    origin: "http://localhost:3000",
+    origin: ["http://localhost:3000", "http://10.10.7.102:3000"],
     credentials: true,
-  })
+  }),
 );
 
 //parser
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+app.use(express.static("uploads"));
+
 app.use("/api/v1", router);
+
+app.post("/send-job", (req, res) => {
+  const { roomId, jobId, message } = req.body;
+
+  try {
+    const io = getIO();
+    io.to(roomId).emit("newJob", { jobId, message });
+
+    res.json({ success: true, message: `Job sent to room ${roomId}` });
+  } catch (error: any) {
+    console.error(error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
 
 app.get("/", (req: Request, res: Response) => {
   res.send({

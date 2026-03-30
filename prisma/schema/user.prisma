@@ -1,8 +1,12 @@
 model User {
-    id                 String     @id @default(uuid())
+    id                 String     @id @default(cuid())
+    name               String?
     email              String     @unique
+    phone              String?
     password           String
+    avatar             String?
     role               UserRole   @default(PATIENT)
+    isVerified         Boolean    @default(false)
     needPasswordChange Boolean    @default(true)
     status             UserStatus @default(ACTIVE)
     createdAt          DateTime   @default(now())
@@ -15,7 +19,7 @@ model User {
 }
 
 model Admin {
-    id            String   @id @default(uuid())
+    id            String   @id @default(cuid())
     name          String
     email         String   @unique
     profilePhoto  String?
@@ -30,7 +34,7 @@ model Admin {
 }
 
 model Doctor {
-    id                  String   @id @default(uuid())
+    id                  String   @id @default(cuid())
     name                String
     email               String   @unique
     profilePhoto        String?
@@ -53,7 +57,7 @@ model Doctor {
 }
 
 model Patient {
-    id           String   @id @default(uuid())
+    id           String   @id @default(cuid())
     email        String   @unique
     name         String
     profilePhoto String?
