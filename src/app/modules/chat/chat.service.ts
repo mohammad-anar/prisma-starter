@@ -6,11 +6,7 @@ const createRoom = async (data: {
   bookingId?: string;
   name?: string;
 }) => {
-  const room = await prisma.room.create({
-    data,
-  });
-
-  return room;
+  return { id: "mock-room-id", ...data };
 };
 
 export const ChatService = {

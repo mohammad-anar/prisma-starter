@@ -7,9 +7,11 @@ import notFound from "./app/middlewares/notFound.js";
 import { getIO } from "./helpers/socketHelper.js";
 
 const app: Application = express();
+const corsOrigins = config.cors_origin as string;
+console.log(corsOrigins.split(","))
 app.use(
   cors({
-    origin: ["http://localhost:3000", "http://10.10.7.102:3000"],
+    origin: corsOrigins.split(","),
     credentials: true,
   }),
 );

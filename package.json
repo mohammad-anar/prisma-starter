@@ -5,9 +5,6 @@
   "author": "azan",
   "license": "MIT",
   "type": "module",
-  "prisma": {
-    "schema": "./prisma/schema"
-  },
   "scripts": {
     "dev": "tsx watch ./src/server.ts",
     "start": "tsx ./src/server.ts",
@@ -16,8 +13,8 @@
     "start:prod": "node dist/server.js"
   },
   "dependencies": {
-    "@prisma/adapter-pg": "^7.1.0",
-    "@prisma/client": "^6.19.2",
+    "@prisma/adapter-pg": "^7.9.1",
+    "@prisma/client": "^7.9.1",
     "@types/colors": "^1.2.4",
     "@types/http-status": "^1.1.2",
     "@types/http-status-codes": "^1.2.0",
@@ -52,9 +49,9 @@
     "@types/express": "^5.0.3",
     "@types/node": "^24.10.2",
     "@types/pdfkit": "^0.17.5",
-    "@types/pg": "^8.15.6",
+    "@types/pg": "^8.21.0",
     "dotenv": "^17.2.2",
-    "prisma": "^6.19.2",
+    "prisma": "^7.9.1",
     "ts-node-dev": "^2.0.0",
     "tsx": "^4.21.0",
     "typescript": "^5.9.2"

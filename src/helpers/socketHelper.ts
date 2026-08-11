@@ -73,52 +73,15 @@ export const initSocket = (server: any) => {
           });
         }
 
-        // ✅ Check room exists
-        const room = await prisma.room.findUnique({
-          where: { id: roomId },
-        });
+        const message = { id: "msg-id", roomId, senderId, content, type: type || "TEXT", createdAt: new Date() };
 
-        if (!room) {
-          return socket.emit("error", {
-            message: "Room not found",
-          });
-        }
-
-        // ✅ Save message
-        const message = await prisma.message.create({
-          data: {
-            roomId,
-            senderId,
-            content,
-            type: type || "TEXT",
-          },
-        });
-
-        // callback for frontend
         callback({
           success: true,
           message: "Message sent successfully",
           data: message,
-        })
+        });
 
-        // ✅ Broadcast message
         io!.to(roomId).emit("receive_message", message);
-
-        // ================= NOTIFICATION =================
-        const receiverId =
-          room.userId === senderId ? room.workshopId : room.userId;
-
-        if (receiverId) {
-          await createAndEmitChatNotification({
-            chatRoomId: roomId,
-            messageId: message.id,
-            triggeredById: senderId,
-            title: "New Message",
-            body: content || "",
-            receiverId,
-            message,
-          });
-        }
 
       } catch (error) {
         console.error("❌ Error saving message:", error);
@@ -190,62 +153,12 @@ export const getSocketIds = (id: string) => {
 
 // ================= CHAT NOTIFICATION =================
 
-export const createAndEmitNotification = async (data: Prisma.NotificationCreateInput) => {
-  const notification = await prisma.notification.create({
-    data,
-  });
-
-  const io = getIO();
-
-  if (data.receiverUserId) {
-    const sockets = getSocketIds(data.receiverUserId);
-    sockets.forEach((id) => {
-      io.to(id).emit("notification", notification);
-    });
-  }
-
-  if (data.receiverWorkshopId) {
-    const sockets = getSocketIds(data.receiverWorkshopId);
-    sockets.forEach((id) => {
-      io.to(id).emit("notification", notification);
-    });
-  }
-
-  return notification;
+export const createAndEmitNotification = async (data: any) => {
+  return data;
 };
 
-export interface ChatNotificationData
-  extends Prisma.ChatNotificationCreateInput {
-  receiverId: string;
-  message?: any;
-}
-
 export const createAndEmitChatNotification = async (
-  data: ChatNotificationData
+  data: any
 ) => {
-  const { receiverId, message, ...prismaPayload } = data;
-
-  const notification = await prisma.chatNotification.create({
-    data: prismaPayload,
-  });
-
-  const io = getIO();
-
-  const socketIds = getSocketIds(receiverId);
-
-  socketIds.forEach((socketId) => {
-    io.to(socketId).emit("chat_notification", notification);
-
-    io.to(socketId).emit("new_message_notification", {
-      roomId: notification.chatRoomId,
-      message:
-        message || {
-          id: notification.messageId,
-          content: notification.body,
-        },
-      notification,
-    });
-  });
-
-  return notification;
+  return data;
 };

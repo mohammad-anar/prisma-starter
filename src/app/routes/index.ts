@@ -1,17 +1,17 @@
 import express from "express";
-import { UserRouter } from "../modules/user/user.routes";
-import { ChatRoutes } from "../modules/chat/chat.routes";
+import { UserRouter } from "../modules/user/user.routes.js";
+import { PostRoutes } from "../modules/post/post.routes.js";
 
 const router = express.Router();
 
 const moduleRoutes = [
   {
-    path: "/user",
+    path: "/users",
     route: UserRouter,
   },
   {
-    path: "/chat",
-    route: ChatRoutes,
+    path: "/posts",
+    route: PostRoutes,
   },
 ];
 
