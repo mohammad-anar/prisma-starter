@@ -1,52 +1,51 @@
 import { prisma } from "../../../db/prisma.js";
 import config from "../../../config/index.js";
 import { CreateUserPayload } from "./user.interface.js";
+import { UserRole, UserStatus } from "@prisma/client";
 import bcrypt from "bcryptjs";
+
+const userSelectedFields = {
+  id: true,
+  firstName: true,
+  lastName: true,
+  email: true,
+  phone: true,
+  profileImage: true,
+  role: true,
+  status: true,
+  isVerified: true,
+  isDeleted: true,
+  needPasswordChange: true,
+  createdAt: true,
+  updatedAt: true,
+};
 
 const createUser = async (payload: CreateUserPayload) => {
   const hashedPassword = await bcrypt.hash(
     payload.password,
-    config.bcrypt_salt_round,
+    config.bcrypt_salt_round || 10,
   );
 
   const result = await prisma.user.create({
     data: {
-      name: payload.name,
+      firstName: payload.firstName,
+      lastName: payload.lastName,
       email: payload.email,
-      password: hashedPassword,
+      passwordHash: hashedPassword,
       phone: payload.phone,
-      avatar: payload.avatar,
+      profileImage: payload.profileImage,
+      role: payload.role || UserRole.STUDENT,
+      status: UserStatus.ACTIVE,
     },
-    select: {
-      id: true,
-      name: true,
-      email: true,
-      phone: true,
-      avatar: true,
-      role: true,
-      status: true,
-      isVerified: true,
-      createdAt: true,
-      updatedAt: true,
-    },
+    select: userSelectedFields,
   });
   return result;
 };
 
 const getAllUsers = async () => {
   const result = await prisma.user.findMany({
-    select: {
-      id: true,
-      name: true,
-      email: true,
-      phone: true,
-      avatar: true,
-      role: true,
-      status: true,
-      isVerified: true,
-      createdAt: true,
-      updatedAt: true,
-    },
+    where: { isDeleted: false },
+    select: userSelectedFields,
   });
   return result;
 };

@@ -1,7 +1,8 @@
 enum UserRole {
-    USER
-    WORKSHOP
     ADMIN
+    INSTRUCTOR
+    STUDENT
+    SUPPORT
 }
 
 enum UserStatus {
@@ -9,5 +10,4 @@ enum UserStatus {
     INACTIVE
     SUSPENDED
     BANNED
-    DELETED
 }

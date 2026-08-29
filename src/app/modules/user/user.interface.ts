@@ -1,7 +1,11 @@
+import { UserRole } from "@prisma/client";
+
 export type CreateUserPayload = {
-  name: string;
+  firstName?: string;
+  lastName?: string;
   email: string;
   password: string;
   phone?: string;
-  avatar?: string;
+  profileImage?: string;
+  role?: UserRole;
 };
