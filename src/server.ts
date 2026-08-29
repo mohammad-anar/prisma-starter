@@ -1,7 +1,8 @@
 import app from "./app.js";
-import config from "./config/index.js";
-import { seedSuperAdmin } from "./db/seedSuperAdmin.js";
-import { initSocket } from "./helpers/socketHelper.js";
+import env from "./config/env.js";
+import { initSocket } from "./config/socket.js";
+import { connectRedis } from "./config/redis.js";
+import { seedSuperAdmin } from "./utils/seedSuperAdmin.js";
 
 let server: any;
 
@@ -13,14 +14,18 @@ process.on("uncaughtException", (error) => {
 
 async function bootstrap() {
   try {
-    // Seed admin
+    // Seed default super admin
     await seedSuperAdmin();
 
-    server = app.listen(config.port, () => {
-      console.log(`🚀 Server running on http://localhost:${config.port}`);
+    // Connect to Redis
+    await connectRedis();
+
+    // Start HTTP server
+    server = app.listen(env.port, () => {
+      console.log(`🚀 Server running on http://localhost:${env.port}`);
     });
 
-    // Initialize socket.io
+    // Initialize Socket.io
     initSocket(server);
   } catch (error) {
     console.error("Error during server startup:", error);

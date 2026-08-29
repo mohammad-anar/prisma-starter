@@ -1,13 +1,11 @@
 import cors from "cors";
 import express, { Application, Request, Response } from "express";
-import config from "./config/index.js";
-import router from "./app/routes/index.js";
-import globalErrorHandler from "./app/middlewares/globalErrorHandler.js";
-import notFound from "./app/middlewares/notFound.js";
-import { getIO } from "./helpers/socketHelper.js";
+import env from "./config/env.js";
+import routes from "./modules/routes.js";
+import { errorHandler, notFoundHandler } from "./middleware/error.middleware.js";
 
 const app: Application = express();
-const corsOrigins = (config.cors_origin as string) || "*";
+const corsOrigins = env.cors_origin || "*";
 
 app.use(
   cors({
@@ -24,34 +22,24 @@ app.use(
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Static uploads
 app.use(express.static("uploads"));
 
-app.use("/api/v1", router);
+// API Router
+app.use("/api/v1", routes);
 
-app.post("/send-job", (req: Request, res: Response) => {
-  const { roomId, jobId, message } = req.body;
-
-  try {
-    const io = getIO();
-    io.to(roomId).emit("newJob", { jobId, message });
-
-    res.json({ success: true, message: `Job sent to room ${roomId}` });
-  } catch (error: any) {
-    console.error(error);
-    res.status(500).json({ success: false, error: error.message });
-  }
-});
-
+// Health check route
 app.get("/", (req: Request, res: Response) => {
   res.send({
-    message: "Server is running..",
-    environment: config.node_env,
+    message: "LMS API Server is running...",
+    environment: env.node_env,
     uptime: process.uptime().toFixed(2) + " sec",
     timeStamp: new Date().toISOString(),
   });
 });
 
-app.use(globalErrorHandler);
-app.use(notFound);
+// Error handling middlewares
+app.use(errorHandler);
+app.use(notFoundHandler);
 
 export default app;
