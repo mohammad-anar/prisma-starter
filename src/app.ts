@@ -7,16 +7,20 @@ import notFound from "./app/middlewares/notFound.js";
 import { getIO } from "./helpers/socketHelper.js";
 
 const app: Application = express();
-const corsOrigins = config.cors_origin as string;
-console.log(corsOrigins.split(","))
+const corsOrigins = (config.cors_origin as string) || "*";
+
 app.use(
   cors({
-    origin: corsOrigins.split(","),
+    origin: corsOrigins.includes(",")
+      ? corsOrigins.split(",").map((origin) => origin.trim())
+      : corsOrigins === "*"
+      ? "*"
+      : [corsOrigins],
     credentials: true,
   }),
 );
 
-//parser
+// Parsers
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -24,7 +28,7 @@ app.use(express.static("uploads"));
 
 app.use("/api/v1", router);
 
-app.post("/send-job", (req, res) => {
+app.post("/send-job", (req: Request, res: Response) => {
   const { roomId, jobId, message } = req.body;
 
   try {
@@ -48,7 +52,6 @@ app.get("/", (req: Request, res: Response) => {
 });
 
 app.use(globalErrorHandler);
-
 app.use(notFound);
 
 export default app;

@@ -9,6 +9,7 @@ export enum UserStatus {
   INACTIVE = "INACTIVE",
   SUSPENDED = "SUSPENDED",
   BANNED = "BANNED",
+  DELETED = "DELETED",
 }
 
 export enum JobStatus {

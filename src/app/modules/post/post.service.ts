@@ -1,4 +1,4 @@
-import { prisma } from "../../../helpers/prisma.js";
+import { prisma } from "../../../db/prisma.js";
 
 const createPost = async (payload: { title: string; content?: string; authorId: string }) => {
   const result = await prisma.post.create({

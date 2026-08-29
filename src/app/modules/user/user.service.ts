@@ -1,9 +1,9 @@
-import { prisma } from "../../../helpers/prisma.js";
+import { prisma } from "../../../db/prisma.js";
 import config from "../../../config/index.js";
-import { createPatientPayload } from "./user.interface.js";
+import { CreateUserPayload } from "./user.interface.js";
 import bcrypt from "bcryptjs";
 
-const createPatient = async (payload: createPatientPayload) => {
+const createUser = async (payload: CreateUserPayload) => {
   const hashedPassword = await bcrypt.hash(
     payload.password,
     config.bcrypt_salt_round,
@@ -11,13 +11,47 @@ const createPatient = async (payload: createPatientPayload) => {
 
   const result = await prisma.user.create({
     data: {
+      name: payload.name,
       email: payload.email,
       password: hashedPassword,
+      phone: payload.phone,
+      avatar: payload.avatar,
+    },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      phone: true,
+      avatar: true,
+      role: true,
+      status: true,
+      isVerified: true,
+      createdAt: true,
+      updatedAt: true,
     },
   });
   return result;
 };
 
-export const UserSerivces = {
-  createPatient,
+const getAllUsers = async () => {
+  const result = await prisma.user.findMany({
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      phone: true,
+      avatar: true,
+      role: true,
+      status: true,
+      isVerified: true,
+      createdAt: true,
+      updatedAt: true,
+    },
+  });
+  return result;
+};
+
+export const UserServices = {
+  createUser,
+  getAllUsers,
 };

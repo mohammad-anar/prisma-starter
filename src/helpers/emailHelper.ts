@@ -1,11 +1,6 @@
-import config from "../config/index.js" ;
+import config from "../config/index.js";
 import nodemailer from "nodemailer";
-
-export type ISendEmail = {
-  to: string;
-  subject: string;
-  html: string;
-};
+import { ISendEmail } from "../types/email.js";
 
 const transporter = nodemailer.createTransport({
   host: config.email.host,

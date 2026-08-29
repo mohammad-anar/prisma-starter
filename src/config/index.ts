@@ -11,6 +11,7 @@ export default {
   bcrypt_salt_round: Number(process.env.BCRYPT_SALT_ROUND),
   cors_origin: process.env.CORS_ORIGIN,
   frontend_url: process.env.FRONTEND_URL,
+  redis_url: process.env.REDIS_URL || "redis://localhost:6379",
   email: {
     from: process.env.EMAIL_FROM,
     user: process.env.EMAIL_USER,

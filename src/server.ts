@@ -13,14 +13,14 @@ process.on("uncaughtException", (error) => {
 
 async function bootstrap() {
   try {
-    // seeding admin
+    // Seed admin
     await seedSuperAdmin();
 
     server = app.listen(config.port, () => {
       console.log(`🚀 Server running on http://localhost:${config.port}`);
     });
-    // socket
-    //socket
+
+    // Initialize socket.io
     initSocket(server);
   } catch (error) {
     console.error("Error during server startup:", error);

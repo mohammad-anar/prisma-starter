@@ -5,7 +5,7 @@ model User {
     phone              String?
     password           String
     avatar             String?
-    role               UserRole   @default(PATIENT)
+    role               UserRole   @default(USER)
     isVerified         Boolean    @default(false)
     needPasswordChange Boolean    @default(true)
     status             UserStatus @default(ACTIVE)
@@ -16,4 +16,3 @@ model User {
 
     @@map("users")
 }
-

@@ -1,13 +1,13 @@
 enum UserRole {
     USER
-    PATIENT
-    DOCTOR
+    WORKSHOP
     ADMIN
 }
 
 enum UserStatus {
     ACTIVE
     INACTIVE
+    SUSPENDED
+    BANNED
     DELETED
 }
-

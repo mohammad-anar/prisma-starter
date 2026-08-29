@@ -1,8 +1,5 @@
 import colors from "colors";
 import { Server, Socket } from "socket.io";
-import { prisma } from "./prisma.js";
-import { Prisma } from "@prisma/client";
-import { ChatService } from "../app/modules/chat/chat.service.js";
 
 let io: Server | null = null;
 
@@ -55,34 +52,39 @@ export const initSocket = (server: any) => {
     });
 
     // ================= SEND MESSAGE =================
-    socket.on("send_message", async (payload: any, callback: (value: any) => void) => {
+    socket.on("send_message", async (payload: any, callback?: (value: any) => void) => {
       try {
-        // 🔥 Ensure JSON object
         let data = payload;
         if (typeof payload === "string") {
           data = JSON.parse(payload);
         }
 
-
         const { roomId, senderId, content, type } = data;
 
-        // ✅ Validation
         if (!roomId || !senderId) {
           return socket.emit("error", {
             message: "roomId and senderId are required",
           });
         }
 
-        const message = { id: "msg-id", roomId, senderId, content, type: type || "TEXT", createdAt: new Date() };
+        const message = {
+          id: `msg-${Date.now()}`,
+          roomId,
+          senderId,
+          content,
+          type: type || "TEXT",
+          createdAt: new Date(),
+        };
 
-        callback({
-          success: true,
-          message: "Message sent successfully",
-          data: message,
-        });
+        if (callback && typeof callback === "function") {
+          callback({
+            success: true,
+            message: "Message sent successfully",
+            data: message,
+          });
+        }
 
         io!.to(roomId).emit("receive_message", message);
-
       } catch (error) {
         console.error("❌ Error saving message:", error);
 
@@ -108,7 +110,11 @@ export const initSocket = (server: any) => {
             });
           }
 
-          const room = await ChatService.createRoom(data);
+          const room = {
+            id: `room-${Date.now()}`,
+            ...data,
+            createdAt: new Date(),
+          };
 
           socket.join(room.id);
           socket.emit("room_created", room);
@@ -157,8 +163,6 @@ export const createAndEmitNotification = async (data: any) => {
   return data;
 };
 
-export const createAndEmitChatNotification = async (
-  data: any
-) => {
+export const createAndEmitChatNotification = async (data: any) => {
   return data;
 };

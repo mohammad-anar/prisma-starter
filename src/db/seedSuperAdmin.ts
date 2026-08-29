@@ -1,19 +1,17 @@
-//role
 import bcrypt from "bcryptjs";
 import config from "../config/index.js";
-import { prisma } from "../helpers/prisma.js";
-import { Role } from "../types/enum.js";
+import { prisma } from "./prisma.js";
+import { UserRole } from "@prisma/client";
 
 export const seedSuperAdmin = async () => {
- console.log("Checking for Admin with email:", config.admin.email);
+  console.log("Checking for Admin with email:", config.admin.email);
 
- // Now prisma.user.findFirst cannot be undefined
- const isExist = await prisma.user.findFirst({
-   where: {
-     email: config.admin.email,
-     role: Role.ADMIN,
-   },
- });
+  const isExist = await prisma.user.findFirst({
+    where: {
+      email: config.admin.email,
+      role: UserRole.ADMIN,
+    },
+  });
 
   if (!isExist) {
     const hashedPassword = await bcrypt.hash(
@@ -28,11 +26,12 @@ export const seedSuperAdmin = async () => {
         phone: config.admin.phone as string,
         password: hashedPassword,
         avatar: config.admin.avatar as string,
-        role: Role.ADMIN,
+        role: UserRole.ADMIN,
         isVerified: true,
       },
     });
+    console.log("Super admin created successfully.");
   } else {
-    console.log("Super admin already exist.");
+    console.log("Super admin already exists.");
   }
 };
