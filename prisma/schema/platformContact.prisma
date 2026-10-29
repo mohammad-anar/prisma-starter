@@ -1,0 +1,12 @@
+model PlatformContact {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  phone       String
+  email       String
+  whatsapp    String
+  updatedById String?   @db.ObjectId
+  updatedBy   User?     @relation("UserPlatformContacts", fields: [updatedById], references: [id])
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@map("platform_contacts")
+}

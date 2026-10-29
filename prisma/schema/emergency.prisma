@@ -1,0 +1,18 @@
+model EmergencyBloodRequest {
+  id          String                 @id @default(auto()) @map("_id") @db.ObjectId
+  title       String
+  rugirNam    String
+  thikana     String
+  phone       String
+  bloodGroup  BloodGroup
+  kotoBag     Int
+  status      EmergencyRequestStatus @default(ACTIVE)
+  createdById String?                @db.ObjectId
+  createdBy   User?                  @relation("UserEmergencyRequests", fields: [createdById], references: [id])
+  createdAt   DateTime               @default(now())
+  updatedAt   DateTime               @updatedAt
+
+  @@map("emergency_blood_requests")
+  @@index([bloodGroup])
+  @@index([status])
+}

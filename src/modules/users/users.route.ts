@@ -1,6 +1,7 @@
 import express from "express";
 import { UserRole } from "@prisma/client";
 import auth from "../../middleware/auth.middleware.js";
+import fileUploadHandler from "../../middleware/fileUpload.middleware.js";
 import validateRequest from "../../middleware/validate.middleware.js";
 import { UserController } from "./users.controller.js";
 import { UserValidation } from "./users.validation.js";
@@ -9,15 +10,29 @@ const router = express.Router();
 
 router.post(
   "/",
-  auth(UserRole.ADMIN),
+  auth(UserRole.ADMIN, UserRole.SUPERADMIN),
   validateRequest(UserValidation.createUserZodSchema),
   UserController.createUser,
 );
 
 router.get(
   "/",
-  auth(UserRole.ADMIN),
+  auth(UserRole.ADMIN, UserRole.SUPERADMIN),
   UserController.getAllUsers,
+);
+
+router.patch(
+  "/me/email",
+  auth(),
+  validateRequest(UserValidation.updateEmailZodSchema),
+  UserController.updateMyEmail,
+);
+
+router.patch(
+  "/me/profile-image",
+  auth(),
+  fileUploadHandler(),
+  UserController.updateMyProfileImage,
 );
 
 router.get(
@@ -28,14 +43,14 @@ router.get(
 
 router.patch(
   "/:id",
-  auth(UserRole.ADMIN),
+  auth(UserRole.ADMIN, UserRole.SUPERADMIN),
   validateRequest(UserValidation.updateUserZodSchema),
   UserController.updateUser,
 );
 
 router.delete(
   "/:id",
-  auth(UserRole.ADMIN),
+  auth(UserRole.ADMIN, UserRole.SUPERADMIN),
   UserController.deleteUser,
 );
 

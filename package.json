@@ -1,8 +1,8 @@
 {
-  "name": "express-prisma-api",
+  "name": "phulpur-blood-donor-network-backend",
   "version": "1.0.0",
   "main": "server.js",
-  "author": "azan",
+  "author": "Phulpur Blood Donor Network Team",
   "license": "MIT",
   "type": "module",
   "scripts": {
@@ -10,11 +10,13 @@
     "start": "tsx ./src/server.ts",
     "build": "tsc",
     "postinstall": "prisma generate",
+    "db:push": "prisma db push",
+    "db:reset": "tsx src/utils/resetDatabase.ts",
+    "test": "tsx --test src/tests/**/*.test.ts",
     "start:prod": "node dist/server.js"
   },
   "dependencies": {
-    "@prisma/adapter-pg": "^7.9.1",
-    "@prisma/client": "^7.9.1",
+    "@prisma/client": "^6.4.1",
     "bcryptjs": "^3.0.3",
     "colors": "^1.4.0",
     "compression": "^1.8.1",
@@ -27,11 +29,10 @@
     "multer": "^2.0.2",
     "nodemailer": "^8.0.1",
     "pdfkit": "^0.18.0",
-    "pg": "^8.16.3",
-    "postgis": "^1.0.6",
     "redis": "^5.11.0",
     "slugify": "^1.6.6",
     "socket.io": "^4.8.3",
+    "swagger-ui-express": "^5.0.1",
     "zod": "^4.3.6"
   },
   "devDependencies": {
@@ -44,8 +45,10 @@
     "@types/node": "^24.10.2",
     "@types/nodemailer": "^7.0.10",
     "@types/pdfkit": "^0.17.5",
-    "@types/pg": "^8.21.0",
-    "prisma": "^7.9.1",
+    "@types/supertest": "^6.0.2",
+    "@types/swagger-ui-express": "^4.1.8",
+    "prisma": "^6.4.1",
+    "supertest": "^7.0.0",
     "tsx": "^4.21.0",
     "typescript": "^5.9.2"
   }

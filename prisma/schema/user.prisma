@@ -1,21 +1,33 @@
 model User {
-    id                 String     @id @default(cuid())
-    firstName          String?
-    lastName           String?
-    email              String     @unique
-    phone              String?
-    passwordHash       String
-    profileImage       String?
-    role               UserRole   @default(STUDENT)
-    isVerified         Boolean    @default(false)
-    isDeleted          Boolean    @default(false)
-    needPasswordChange Boolean    @default(true)
-    status             UserStatus @default(ACTIVE)
-    createdAt          DateTime   @default(now())
-    updatedAt          DateTime   @updatedAt
+  id                         String       @id @default(auto()) @map("_id") @db.ObjectId
+  name                       String
+  phone                      String       @unique
+  email                      String?      @unique
+  emailVerifiedAt            DateTime?
+  emailVerificationTokenHash String?
+  emailVerificationExpiresAt DateTime?
+  passwordResetTokenHash     String?
+  passwordResetExpiresAt     DateTime?
+  passwordChangedAt          DateTime?
+  bloodGroup                 BloodGroup
+  status                     UserStatus   @default(PENDING)
+  currentAddress             String
+  permanentAddress           String
+  passwordHashed             String
+  role                       UserRole     @default(DONOR)
+  isBlocked                  Boolean      @default(false)
+  profileImage               String?
+  gender                     String?      @default("male")
+  createdAt                  DateTime     @default(now())
+  updatedAt                  DateTime     @updatedAt
 
-    @@map("users")
-    @@index([email])
-    @@index([phone])
-    @@index([role])
+  donations               BloodDonateRecord[]     @relation("DonorRecords")
+  verifiedDonations       BloodDonateRecord[]     @relation("VerifierRecords")
+  emergencyRequests       EmergencyBloodRequest[] @relation("UserEmergencyRequests")
+  updatedPlatformContacts PlatformContact[]       @relation("UserPlatformContacts")
+
+  @@map("users")
+  @@index([bloodGroup])
+  @@index([role])
+  @@index([status])
 }

@@ -9,7 +9,7 @@ export const fileUploadHandler = () => {
   const baseUploadDir = path.join(process.cwd(), "uploads");
 
   if (!fs.existsSync(baseUploadDir)) {
-    fs.mkdirSync(baseUploadDir);
+    fs.mkdirSync(baseUploadDir, { recursive: true });
   }
 
   const createFolder = (folderPath: string) => {
@@ -27,6 +27,10 @@ export const fileUploadHandler = () => {
         case "avatar":
           uploadDir = path.join(baseUploadDir, "image");
           break;
+        case "slip":
+        case "donationSlip":
+          uploadDir = path.join(baseUploadDir, "slips");
+          break;
         case "media":
         case "video":
           uploadDir = path.join(baseUploadDir, "media");
@@ -43,36 +47,40 @@ export const fileUploadHandler = () => {
     },
     filename: (req, file, cb) => {
       const fileExt = path.extname(file.originalname);
-      const fileName =
-        file.originalname
-          .replace(fileExt, "")
-          .toLowerCase()
-          .split(" ")
-          .join("-") +
-        "-" +
-        Date.now();
-      cb(null, fileName + fileExt);
+      const cleanBase = path
+        .basename(file.originalname, fileExt)
+        .toLowerCase()
+        .replace(/[^a-z0-9]/g, "-")
+        .replace(/-+/g, "-")
+        .slice(0, 50);
+      const fileName = `${cleanBase}-${Date.now()}${fileExt}`;
+      cb(null, fileName);
     },
   });
 
-  const filterFilter = (req: Request, file: any, cb: any) => {
-    if (
+  const fileFilter = (req: Request, file: any, cb: any) => {
+    const isImage =
       file.fieldname === "image" ||
       file.fieldname === "profileImage" ||
-      file.fieldname === "avatar"
-    ) {
-      if (
-        file.mimetype === "image/jpeg" ||
-        file.mimetype === "image/png" ||
-        file.mimetype === "image/jpg" ||
-        file.mimetype === "image/webp"
-      ) {
+      file.fieldname === "avatar" ||
+      file.fieldname === "slip" ||
+      file.fieldname === "donationSlip";
+
+    if (isImage) {
+      const allowedImageTypes = [
+        "image/jpeg",
+        "image/png",
+        "image/jpg",
+        "image/webp",
+        "application/pdf",
+      ];
+      if (allowedImageTypes.includes(file.mimetype)) {
         cb(null, true);
       } else {
         cb(
           new ApiError(
             StatusCodes.BAD_REQUEST,
-            "Only .jpeg, .png, .jpg, .webp file supported",
+            "Only .jpeg, .png, .jpg, .webp or .pdf files are supported for images and slips",
           ),
         );
       }
@@ -82,12 +90,17 @@ export const fileUploadHandler = () => {
   };
 
   return multer({
-    storage: storage,
-    fileFilter: filterFilter,
+    storage,
+    fileFilter,
+    limits: {
+      fileSize: 5 * 1024 * 1024, // 5MB limit
+    },
   }).fields([
     { name: "image", maxCount: 3 },
     { name: "profileImage", maxCount: 1 },
     { name: "avatar", maxCount: 1 },
+    { name: "slip", maxCount: 1 },
+    { name: "donationSlip", maxCount: 1 },
     { name: "media", maxCount: 3 },
     { name: "doc", maxCount: 3 },
   ]);

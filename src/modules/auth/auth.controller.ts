@@ -6,7 +6,10 @@ import sendResponse from "../../utils/sendResponse.js";
 import { AuthServices } from "./auth.service.js";
 
 const registerUser = catchAsync(async (req: Request, res: Response) => {
-  const profileImage = getSingleFilePath(req.files, "image");
+  const profileImage =
+    getSingleFilePath(req.files, "profileImage") ||
+    getSingleFilePath(req.files, "image") ||
+    getSingleFilePath(req.files, "avatar");
 
   const payload = {
     ...req.body,
@@ -17,7 +20,7 @@ const registerUser = catchAsync(async (req: Request, res: Response) => {
   sendResponse(res, {
     statusCode: StatusCodes.CREATED,
     success: true,
-    message: "User registered successfully",
+    message: "Registration successful. Pending administrator approval.",
     data: result,
   });
 });
@@ -29,6 +32,15 @@ const loginUser = catchAsync(async (req: Request, res: Response) => {
     success: true,
     message: "User logged in successfully",
     data: result,
+  });
+});
+
+const logoutUser = catchAsync(async (req: Request, res: Response) => {
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: "Logged out successfully",
+    data: null,
   });
 });
 
@@ -61,7 +73,7 @@ const forgotPassword = catchAsync(async (req: Request, res: Response) => {
   sendResponse(res, {
     statusCode: StatusCodes.OK,
     success: true,
-    message: "Password reset link sent successfully",
+    message: "Password reset instructions generated successfully",
     data: result,
   });
 });
@@ -94,13 +106,41 @@ const getMe = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const sendEmailVerification = catchAsync(async (req: Request, res: Response) => {
+  const userId = req.user.id;
+  const result = await AuthServices.sendEmailVerification(userId);
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: result.message || "Verification email sent successfully",
+    data: result,
+  });
+});
+
+const verifyEmail = catchAsync(async (req: Request, res: Response) => {
+  const token =
+    req.body.token ||
+    (req.query.token as string) ||
+    req.headers.authorization?.replace("Bearer ", "");
+  const result = await AuthServices.verifyEmail({ token });
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: result.message || "Email verified successfully",
+    data: result,
+  });
+});
+
 export const AuthController = {
   registerUser,
   loginUser,
+  logoutUser,
   refreshToken,
   changePassword,
   forgotPassword,
   resetPassword,
+  sendEmailVerification,
+  verifyEmail,
   getMe,
 };
 

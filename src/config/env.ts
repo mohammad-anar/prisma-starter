@@ -18,11 +18,14 @@ export const env = {
     api_secret: process.env.CLOUDINARY_API_SECRET || "",
   },
   email: {
-    from: process.env.EMAIL_FROM || "",
+    provider: (process.env.EMAIL_PROVIDER || "smtp").toLowerCase(),
+    resend_api_key: process.env.RESEND_API_KEY || "",
+    from: process.env.EMAIL_FROM || "ফুলপুর ব্লাড ডোনার নেটওয়ার্ক <noreply@phulpur-blood.org>",
     user: process.env.EMAIL_USER || "",
     port: process.env.EMAIL_PORT || "587",
     host: process.env.EMAIL_HOST || "",
     pass: process.env.EMAIL_PASS || "",
+    app_base_url: process.env.APP_BASE_URL || process.env.FRONTEND_URL || "http://localhost:3000",
   },
   jwt: {
     jwt_secret: process.env.JWT_SECRET || "default_jwt_secret",

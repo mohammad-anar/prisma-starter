@@ -1,0 +1,21 @@
+model BloodDonateRecord {
+  id                 String         @id @default(auto()) @map("_id") @db.ObjectId
+  donorId            String         @db.ObjectId
+  donor              User           @relation("DonorRecords", fields: [donorId], references: [id])
+  donationDate       DateTime
+  donationAddress    String
+  rugirDhoron        String?
+  donationSlipNumber String?
+  slipUrl            String?
+  status             DonationStatus @default(PENDING)
+  verifiedById       String?        @db.ObjectId
+  verifiedBy         User?          @relation("VerifierRecords", fields: [verifiedById], references: [id])
+  verifiedAt         DateTime?
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
+
+  @@map("blood_donate_records")
+  @@index([donorId])
+  @@index([status])
+  @@index([donationDate])
+}

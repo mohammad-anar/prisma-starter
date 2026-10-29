@@ -1,32 +1,42 @@
-import { UserRole } from "@prisma/client";
+import { BloodGroup } from "@prisma/client";
 
 export type IRegisterUser = {
-  firstName?: string;
-  lastName?: string;
-  email: string;
+  name: string;
+  phone: string;
+  bloodGroup: BloodGroup | string;
+  currentAddress: string;
+  permanentAddress: string;
   password: string;
-  phone?: string;
+  email?: string;
   profileImage?: string;
-  role?: UserRole;
+  gender?: string;
 };
 
 export type ILoginUser = {
-  email: string;
+  phone?: string;
+  email?: string;
+  identifier?: string;
   password: string;
 };
 
 export type IChangePassword = {
-  oldPassword: string;
+  oldPassword?: string;
+  currentPassword?: string;
   newPassword: string;
 };
 
 export type IForgotPassword = {
-  email: string;
+  phone?: string;
+  email?: string;
 };
 
 export type IResetPassword = {
   token: string;
   newPassword: string;
+};
+
+export type IVerifyEmail = {
+  token: string;
 };
 
 export type IRefreshToken = {

@@ -1,45 +1,64 @@
 import bcrypt from "bcryptjs";
 import env from "../config/env.js";
 import prisma from "../config/prisma.js";
-import { UserRole, UserStatus } from "@prisma/client";
+import { BloodGroup, UserRole, UserStatus } from "@prisma/client";
 
 export const seedSuperAdmin = async () => {
-  if (!env.admin.email || !env.admin.password) {
-    return;
-  }
+  const superAdminPhone = env.admin.phone || "01972606255";
+  const superAdminEmail = env.admin.email || "bonnochobi@gmail.com";
+  const superAdminPassword = env.admin.password || "@Hridoy7060@";
+  const superAdminName = env.admin.name || "Hridoy Hassan";
 
-  console.log("Checking for Admin with email:", env.admin.email);
+  try {
+    const existingSuperAdmin = await prisma.user.findFirst({
+      where: {
+        OR: [
+          { role: UserRole.SUPERADMIN },
+          { phone: superAdminPhone },
+          { email: superAdminEmail.toLowerCase() },
+        ],
+      },
+    });
 
-  const isExist = await prisma.user.findFirst({
-    where: {
-      email: env.admin.email,
-      role: UserRole.ADMIN,
-    },
-  });
-
-  if (!isExist) {
     const hashedPassword = await bcrypt.hash(
-      env.admin.password,
+      superAdminPassword,
       env.bcrypt_salt_round || 10,
     );
 
-    await prisma.user.create({
-      data: {
-        firstName: env.admin.name || "Super",
-        lastName: "Admin",
-        email: env.admin.email,
-        phone: env.admin.phone,
-        passwordHash: hashedPassword,
-        profileImage: env.admin.avatar,
-        role: UserRole.ADMIN,
-        isVerified: true,
-        needPasswordChange: false,
-        status: UserStatus.ACTIVE,
-      },
-    });
-    console.log("Super admin created successfully.");
-  } else {
-    console.log("Super admin already exists.");
+    if (!existingSuperAdmin) {
+      await prisma.user.create({
+        data: {
+          name: superAdminName,
+          phone: superAdminPhone,
+          email: superAdminEmail,
+          bloodGroup: BloodGroup.O_POSITIVE,
+          status: UserStatus.APPROVED,
+          currentAddress: "ফুলপুর পৌরসভা, ফুলপুর, ময়মনসিংহ",
+          permanentAddress: "ফুলপুর পৌরসভা, ফুলপুর, ময়মনসিংহ",
+          passwordHashed: hashedPassword,
+          role: UserRole.SUPERADMIN,
+          isBlocked: false,
+          profileImage: env.admin.avatar || null,
+        },
+      });
+      console.log("🛡️ Super Admin initialized successfully:", superAdminPhone);
+    } else {
+      await prisma.user.update({
+        where: { id: existingSuperAdmin.id },
+        data: {
+          name: superAdminName,
+          phone: superAdminPhone,
+          email: superAdminEmail,
+          passwordHashed: hashedPassword,
+          role: UserRole.SUPERADMIN,
+          status: UserStatus.APPROVED,
+          isBlocked: false,
+        },
+      });
+      console.log("🛡️ Super Admin account updated and verified:", superAdminPhone);
+    }
+  } catch (error: any) {
+    console.error("⚠️ Error while checking/seeding Super Admin:", error.message);
   }
 };
 

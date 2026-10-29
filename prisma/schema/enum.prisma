@@ -1,13 +1,40 @@
+enum BloodGroup {
+  A_POSITIVE
+  A_NEGATIVE
+  B_POSITIVE
+  B_NEGATIVE
+  AB_POSITIVE
+  AB_NEGATIVE
+  O_POSITIVE
+  O_NEGATIVE
+}
+
 enum UserRole {
-    ADMIN
-    INSTRUCTOR
-    STUDENT
-    SUPPORT
+  SUPERADMIN
+  ADMIN
+  DONOR
 }
 
 enum UserStatus {
-    ACTIVE
-    INACTIVE
-    SUSPENDED
-    BANNED
+  PENDING
+  APPROVED
 }
+
+enum DonationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum EmergencyRequestStatus {
+  ACTIVE
+  FULFILLED
+  CLOSED
+}
+
+enum ContactMessageStatus {
+  NEW
+  READ
+  RESOLVED
+}
+
