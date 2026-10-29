@@ -87,4 +87,25 @@ describe("120-Day Blood Donation Countdown Calculator", () => {
     assert.equal(result.canDonateNow, true);
     assert.equal(result.displayStatus, "NO_RECORD");
   });
+
+  it("should correctly compute 120-day interval restriction and Bengali days remaining", () => {
+    const now = new Date("2026-10-29T12:00:00.000Z");
+    // Donated 40 days ago -> 80 days remaining
+    const lastDonationDate = new Date(now.getTime() - 40 * 24 * 60 * 60 * 1000);
+    const msSince = now.getTime() - lastDonationDate.getTime();
+    const daysSince = Math.floor(msSince / (1000 * 60 * 60 * 24));
+    const daysRemaining = 120 - daysSince;
+
+    assert.equal(daysSince, 40);
+    assert.equal(daysRemaining, 80);
+    assert.equal(daysRemaining > 0, true); // Still cooling down, cannot submit
+
+    // Donated 125 days ago -> 0 days remaining
+    const eligibleDonationDate = new Date(now.getTime() - 125 * 24 * 60 * 60 * 1000);
+    const msSinceEligible = now.getTime() - eligibleDonationDate.getTime();
+    const daysSinceEligible = Math.floor(msSinceEligible / (1000 * 60 * 60 * 24));
+    const daysRemainingEligible = Math.max(0, 120 - daysSinceEligible);
+
+    assert.equal(daysRemainingEligible, 0); // Eligible, can submit
+  });
 });

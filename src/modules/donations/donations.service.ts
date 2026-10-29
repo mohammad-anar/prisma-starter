@@ -2,7 +2,7 @@ import { StatusCodes } from "http-status-codes";
 import prisma from "../../config/prisma.js";
 import ApiError from "../../utils/ApiError.js";
 import { formatBloodGroupDetails, parseBloodGroupFilter } from "../../utils/bloodGroup.js";
-import { calculateCountdown } from "../../utils/countdown.js";
+import { calculateCountdown, toBengaliDigits } from "../../utils/countdown.js";
 import { validateObjectId } from "../../utils/objectId.js";
 import calculatePagination from "../../utils/pagination.js";
 import { ICreateDonationRecord, IDonationRecordFilters } from "./donations.interface.js";
@@ -37,6 +37,38 @@ const createDonation = async (
       StatusCodes.BAD_REQUEST,
       "Donation date cannot be in the future",
     );
+  }
+
+  // 120-day interval rule: A donor cannot submit a new donation record within 120 days of their previous donation
+  const latestDonation = await prisma.bloodDonateRecord.findFirst({
+    where: {
+      donorId,
+      status: { in: ["APPROVED", "PENDING"] },
+    },
+    orderBy: { donationDate: "desc" },
+  });
+
+  if (latestDonation) {
+    const lastDate = new Date(latestDonation.donationDate);
+    const msSinceLast = now.getTime() - lastDate.getTime();
+    const daysSinceLast = Math.floor(msSinceLast / (1000 * 60 * 60 * 24));
+    const daysRemaining = 120 - daysSinceLast;
+
+    if (daysRemaining > 0) {
+      throw new ApiError(
+        StatusCodes.BAD_REQUEST,
+        `পূর্ববর্তী রক্তদানের ১২০ দিন পূর্ণ হওয়ার আগে নতুন রক্তদানের তথ্য জমা দেওয়া যাবে না। আর ${toBengaliDigits(daysRemaining)} দিন বাকি আছে।`,
+      );
+    }
+
+    const msBetween = parsedDate.getTime() - lastDate.getTime();
+    const daysBetween = Math.floor(msBetween / (1000 * 60 * 60 * 24));
+    if (daysBetween < 120) {
+      throw new ApiError(
+        StatusCodes.BAD_REQUEST,
+        `নতুন রক্তদানের তারিখটি পূর্ববর্তী রক্তদানের (${lastDate.toISOString().split("T")[0]}) কমপক্ষে ১২০ দিন পরের হতে হবে।`,
+      );
+    }
   }
 
   const slipUrl = slipFilePath || payload.slipUrl || null;
@@ -88,11 +120,44 @@ const getMyDonations = async (donorId: string) => {
     },
   });
 
+  const now = new Date();
   const latestApproved = records.find((r) => r.status === "APPROVED");
-  const countdown = calculateCountdown(latestApproved?.donationDate);
+  const countdown = calculateCountdown(latestApproved?.donationDate, now);
+
+  // Find the latest donation record (APPROVED or PENDING) to enforce the 120-day rule for new submissions
+  const latestActiveDonation = records.find(
+    (r) => r.status === "APPROVED" || r.status === "PENDING",
+  );
+
+  let submissionCooldown = {
+    canSubmitNewRecord: true,
+    daysRemaining: 0,
+    daysSinceLast: null as number | null,
+    lastDonationDate: null as string | null,
+    nextEligibleDate: null as string | null,
+    lastStatus: null as string | null,
+  };
+
+  if (latestActiveDonation) {
+    const lastDate = new Date(latestActiveDonation.donationDate);
+    const msSinceLast = now.getTime() - lastDate.getTime();
+    const daysSinceLast = Math.floor(msSinceLast / (1000 * 60 * 60 * 24));
+    const daysRemaining = Math.max(0, 120 - daysSinceLast);
+    const nextEligible = new Date(lastDate.getTime() + 120 * 24 * 60 * 60 * 1000);
+
+    submissionCooldown = {
+      canSubmitNewRecord: daysRemaining <= 0,
+      daysRemaining,
+      daysSinceLast,
+      lastDonationDate: lastDate.toISOString(),
+      nextEligibleDate: nextEligible.toISOString(),
+      lastStatus: latestActiveDonation.status,
+    };
+  }
 
   return {
     countdown,
+    submissionCooldown,
     summary: {
       totalDonations: records.length,
       approvedDonations: records.filter((r) => r.status === "APPROVED").length,
